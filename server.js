@@ -30,7 +30,7 @@ app.get("/", (req, res, next) => {
 
 //  API endpoints
 app.get("/api/bikes", (req, res, next) => {
-    var sql = "select * from almacen"
+    var sql = "select * from almacen3"
     var params = []
     db.all(sql, params, (err, rows) => {
         if (err) {
@@ -45,7 +45,7 @@ app.get("/api/bikes", (req, res, next) => {
 });
 //traer por id
 app.get("/api/bikes/:id", (req, res, next) => {
-    var sql = "select * from almacen where id = ?"
+    var sql = "select * from almacen3 where id = ?"
     var params = [req.params.id]
     db.get(sql, params, (err, row) => {
         if (err) {
@@ -76,6 +76,9 @@ app.post("/api/bikes/", (req, res, next) => {
     if (!req.body.cantidad){
         errors.push("No cantidad specified");
     }
+    if (!req.body.image){
+        errors.push("No image specified");
+    }
     if (errors.length){
         res.status(400).json({"error":errors.join(",")});
         return;
@@ -85,10 +88,11 @@ app.post("/api/bikes/", (req, res, next) => {
         rodada: req.body.rodada,
         color: req.body.color,
         precio: req.body.precio,
-        cantidad: req.body.cantidad
+        cantidad: req.body.cantidad,
+        image: req.body.image
     }
-    var sql ='INSERT INTO almacen (marca, rodada, color,precio,cantidad) VALUES (?,?,?,?,?)'
-    var params =[data.marca, data.rodada, data.color, data.precio,data.cantidad]
+    var sql ='INSERT INTO almacen3 (marca, rodada, color,precio,cantidad,image) VALUES (?,?,?,?,?,?)'
+    var params =[data.marca, data.rodada, data.color, data.precio,data.cantidad,data.image]
     db.run(sql, params, function (err, result) {
         if (err){
             res.status(400).json({"error": err.message})
@@ -108,17 +112,20 @@ app.patch("/api/bikes/:id", (req, res, next) => {
         rodada: req.body.rodada,
         color: req.body.color,
         precio: req.body.precio,
-        cantidad: req.body.cantidad
+        cantidad: req.body.cantidad,
+        image: req.body.image
     }
     db.run(
-        `UPDATE almacen set 
+        `UPDATE almacen3 set 
            marca = COALESCE(?,marca), 
            rodada = COALESCE(?,rodada), 
            color = COALESCE(?,color),
            precio = COALESCE(?,precio),
-           cantidad = COALESCE(?,cantidad) 
+           cantidad = COALESCE(?,cantidad),
+           image = COALESCE(?,image)
            WHERE id = ?`,
-        [data.marca, data.rodada, data.color, data.precio, data.cantidad, req.params.id],
+
+        [data.marca, data.rodada, data.color, data.precio, data.cantidad, data.image, req.params.id],
         function (err, result) {
             if (err){
                 res.status(400).json({"error": res.message})
@@ -134,7 +141,7 @@ app.patch("/api/bikes/:id", (req, res, next) => {
 
 app.delete("/api/bikes/:id", (req, res, next) => {
     db.run(
-        'DELETE FROM almacen WHERE id = ?',
+        'DELETE FROM almacen3 WHERE id = ?',
         req.params.id,
         function (err, result) {
             if (err){
